@@ -5,6 +5,7 @@ use AnyEvent;
 use AnyEvent::Util ();
 use Mac::FSEvents;
 use File::Which ();
+use URI::Escape ();
 
 our $VERSION = "0.01";
 
@@ -107,7 +108,10 @@ sub screenshots {
         $self->scp("$dir/$file", $self->{screenshots},
           cb => sub {
             unlink "$dir/$file";
-            $self->run_cmd(["pbcopy"], stdin => \"$self->{url}$file"); 
+            my $copy = $self->{url} . URI::Escape::uri_escape($file);
+            $self->run_cmd(["pbcopy"],
+              stdin => \$copy
+            ); 
           }
         );
       }
