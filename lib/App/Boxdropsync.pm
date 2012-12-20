@@ -108,12 +108,11 @@ sub screenshots {
         $self->scp("$dir/$file", $self->{screenshots},
           cb => sub {
             unlink "$dir/$file";
-            my $copy = $self->{url} . URI::Escape::uri_escape($file);
-            $self->run_cmd(["pbcopy"],
-              stdin => \$copy
-            ); 
+            $self->run_cmd(["say", "paste it!"]);
           }
         );
+        my $copy = $self->{url} . URI::Escape::uri_escape($file);
+        $self->run_cmd(["pbcopy"], stdin => \$copy);
       }
     };
   };
@@ -121,11 +120,8 @@ sub screenshots {
 
 sub run_cmd {
   my ($self, $command, %args) = @_;
-  my ($out, $err);
-  my $cv = AE::cv;
 
   $self->{cv}->begin;
-
   $self->log("running " . join " ", @$command);
 
   my $cv = AnyEvent::Util::run_cmd $command,
