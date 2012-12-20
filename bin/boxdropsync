@@ -1,0 +1,100 @@
+#!/usr/bin/env perl
+
+use App::Boxdropsync;
+use Getopt::Long;
+use Pod::Usage;
+
+my $opts = {
+  help   => 0,
+  local  => "$ENV{HOME}/Dropbox",
+  remote => undef,
+  screenshots => undef,
+  interval => undef,
+  log    => "$ENV{HOME}/.boxdropsync.log",
+  opts   => undef,
+  url    => undef,
+};
+
+$result = GetOptions(
+  "help|?"        => \($opts->{help}),
+  "local=s"       => \($opts->{local}),
+  "remote=s"      => \($opts->{remote}),
+  "screenshots=s" => \($opts->{screenshots}),
+  "interval=i"    => \($opts->{interval}),
+  "log"           => \($opts->{log}),
+  "opts=s"        => \($opts->{opts}),
+  "url=s"         => \($opts->{url}),
+);
+
+pod2usage(1) if $opts->{help};
+
+App::Boxdropsync->new(%$opts)->run;
+
+__END__
+
+=head1 NAME
+
+boxdropsync - a Dropbox + Grabbox replacement
+
+=head1 SYNOPSIS
+
+boxdropsync OPTIONS
+
+ Options:
+   --help                 print help message
+   --local=PATH           local directory to monitor
+   --remote=DEST          rsync connection info
+   --screenshots=DEST     rsync connection info for screenshots
+   --interval=SEC         interval for polling remote server
+   --log=PATH             log file (default ~/.boxdropsync/log.txt)
+   --opts=OPTS            flags to pass to rsync (default -q -a)
+   --url=URL              URL prefix for screenshots links
+
+=head1 OPTIONS
+
+=over8
+
+=item B<--help>
+
+Print a help message and exit.
+
+=item B<--local=PATH>
+
+Local directory that will be monitored. (Default ~/Dropbox)
+
+=item B<--remote=DEST>
+
+rsync connection info for remote server.
+
+=item B<--screenshots=DEST>
+
+resync connection info for screenshots.
+
+=item B<--interval=SEC>
+
+Seconds to wait between polling remote server for changes.
+
+=item B<--log>
+
+Log file. (default ~/.boxdropsync/log.txt)
+
+=item B<--opts=OPTS>
+
+Options to pass to rsync. (default -q -a)
+
+=item B<--url>
+
+URL prefix for screenshot links.
+
+=back
+
+=head1 DESCRIPTION
+
+B<boxdropsync> copies the combined behavior of Dropbox and
+Grabbox for OS X. It efficiently monitors a local folder
+and rsyncs modified files to a remote server. Additionally,
+it monitors the desktop for new screenshots. It will give
+upload screenshots to the remote server before deleting them
+from the desktop.
+
+=cut
