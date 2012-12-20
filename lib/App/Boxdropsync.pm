@@ -46,7 +46,7 @@ sub new {
 
 sub log {
   my ($self, $line) = @_;
-  open my $fh, ">", $self->{log} or die $!;
+  open my $fh, ">>", $self->{log} or die $!;
   print $fh, "$line\n";
 }
 
@@ -63,14 +63,23 @@ sub run {
 
   $self->{io} = AE::io $fs->watch, 0, sub {
     () for $fs->read_events;
-    $self->rsync($self->{local}, $self->{remote});
+    $self->{pushing} = 1;
+    $self->rsync($self->{local}, $self->{remote},
+      cb => sub { $self->{pushing} = 0 }
+    );
   };
 
   $self->screenshots if $self->{screenshots};
 
   $self->{t} = AE::timer 0, $self->{interval}, sub {
+    return if $self->{pushing}; # don't pull changes while pushing
     $self->rsync($self->{remote}, $self->{local}); # reverse
   };
+
+  for (qw/TERM INT QUIT/) {
+    $self->log("shutting down");
+    $self->{s} = AE::signal $_ => sub { $self->{cv}->end };
+  }
 
   $self->{cv}->begin;
   $self->{cv}->recv;
