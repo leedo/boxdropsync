@@ -48,7 +48,7 @@ sub new {
 sub log {
   my ($self, $line) = @_;
   open my $fh, ">>", $self->{log} or die $!;
-  print $fh, "$line\n";
+  print $fh "$line\n";
 }
 
 sub run {
