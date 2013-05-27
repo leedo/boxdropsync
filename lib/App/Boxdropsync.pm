@@ -105,13 +105,19 @@ sub screenshots {
       opendir my $dh, $dir;
       while (my $file = readdir $dh) {
         next unless $file =~ m{^Screen Shot[^/]+\.png};
-        $self->scp("$dir/$file", $self->{screenshots},
+        my @parts = $file =~ m{
+          (\d{4})-(\d{2})-(\d{2}) \s at \s
+          (\d+)\.(\d+)\.(\d+) \s
+          (AM|PM)
+        }x;
+        my $name = sprintf "%02d%02d%02d-%02d%02d%02d.png", @parts;
+        $self->scp("$dir/$file", "$self->{screenshots}$name",
           cb => sub {
             unlink "$dir/$file";
-            $self->run_cmd(["say", "paste it!"]);
+            $self->run_cmd([qw{say -v Zarvox}, "paste it!"]);
           }
         );
-        my $copy = $self->{url} . URI::Escape::uri_escape($file);
+        my $copy = $self->{url} . URI::Escape::uri_escape($name);
         $self->run_cmd(["pbcopy"], stdin => \$copy);
       }
     };
