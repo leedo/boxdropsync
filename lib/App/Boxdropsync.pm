@@ -110,7 +110,7 @@ sub screenshots {
           (\d+)\.(\d+)\.(\d+) \s
           (AM|PM)
         }x;
-        my $name = sprintf "%02d%02d%02d-%02d%02d%02d.png", @parts;
+        my $name = sprintf "%02d%02d%02d-%02d%02d%02d%s.png", @parts;
         $self->scp("$dir/$file", "$self->{screenshots}$name",
           cb => sub {
             unlink "$dir/$file";
